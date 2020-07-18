@@ -1,0 +1,20 @@
+--- net/ipv4/syncookies.c
++++ net/ipv4/syncookies.c
+@@ -375,12 +403,17 @@ struct sock *cookie_v4_check(struct sock *sk, struct sk_buff *skb)
+ 	ireq->sack_ok		= tcp_opt.sack_ok;
+ 	ireq->wscale_ok		= tcp_opt.wscale_ok;
+ 	ireq->tstamp_ok		= tcp_opt.saw_tstamp;
++	ireq->mptcp_rqsk	= 0;
++	ireq->saw_mpc		= 0;
+ 	req->ts_recent		= tcp_opt.saw_tstamp ? tcp_opt.rcv_tsval : 0;
+ 	treq->snt_synack.v64	= 0;
+ 	treq->tfo_listener	= false;
+ 
+ 	ireq->ir_iif = sk->sk_bound_dev_if;
+ 
++	if (mopt.saw_mpc)
++		mptcp_cookies_reqsk_init(req, &mopt, skb);
++
+ 	/* We throwed the options of the initial SYN away, so we hope
+ 	 * the ACK carries the same options again (see RFC1122 4.2.3.8)
+ 	 */
